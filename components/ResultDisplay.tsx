@@ -1,64 +1,87 @@
-import React from 'react';
-import { GenerationResult } from '../types';
-import PhotoIcon from './icons/PhotoIcon';
+// FIX: Implemented the ResultDisplay component to show the generated image or loading/error states.
+import React, { useState } from 'react';
+import { GeneratedImage } from '../types';
+import Loader from './Loader';
 import DownloadIcon from './icons/DownloadIcon';
+import CopyIcon from './icons/CopyIcon';
+import CheckIcon from './icons/CheckIcon';
 
 interface ResultDisplayProps {
-  result: GenerationResult | null;
+  isLoading: boolean;
+  generatedImage: GeneratedImage | null;
+  error: string | null;
 }
 
-const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
-  const handleDownload = () => {
-    if (!result) return;
-    const link = document.createElement('a');
-    link.href = `data:image/png;base64,${result.image}`;
-    link.download = `nanopersona-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+const ResultDisplay: React.FC<ResultDisplayProps> = ({ isLoading, generatedImage, error }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyPrompt = () => {
+    if (generatedImage?.prompt) {
+      navigator.clipboard.writeText(generatedImage.prompt);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
-  if (!result) {
+  const handleDownload = () => {
+    if (generatedImage?.imageUrl) {
+      const link = document.createElement('a');
+      link.href = generatedImage.imageUrl;
+      link.download = 'nanopersona-image.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+
+  if (isLoading) {
+    return <Loader />;
+  }
+  
+  if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[500px] bg-brand-surface rounded-lg border-2 border-dashed border-brand-border text-brand-text-muted p-8">
-        <PhotoIcon className="w-16 h-16 mb-4" />
-        <h3 className="text-xl font-semibold">Your AI Persona Appears Here</h3>
-        <p className="mt-2 text-center max-w-md">Define your influencer's blueprint, set the scene, and click 'Generate' to bring your NanoPersona to life.</p>
-      </div>
+        <div className="flex flex-col items-center justify-center h-full min-h-[500px] bg-red-500/10 rounded-lg border border-red-500/30 p-8 text-center">
+            <h3 className="text-xl font-semibold text-red-400">Generation Failed</h3>
+            <p className="mt-2 text-red-400/80 max-w-md">{error}</p>
+        </div>
+    );
+  }
+
+  if (!generatedImage) {
+    return (
+        <div className="flex flex-col items-center justify-center h-full min-h-[500px] bg-brand-surface rounded-lg border border-brand-border p-8 text-center">
+            <h3 className="text-xl font-semibold text-brand-text">Your Persona Awaits</h3>
+            <p className="mt-2 text-brand-text-muted">Fill out the blueprint and scene details to generate your image.</p>
+        </div>
     );
   }
 
   return (
     <div className="bg-brand-surface rounded-lg border border-brand-border overflow-hidden">
-      <div className="relative">
-        <img
-          src={`data:image/png;base64,${result.image}`}
-          alt="Generated AI Influencer"
-          className="w-full h-auto object-cover"
-        />
-        <button
-            onClick={handleDownload}
-            className="absolute top-4 right-4 bg-brand-bg/50 text-white p-2 rounded-full backdrop-blur-sm hover:bg-brand-primary hover:text-brand-bg transition-colors duration-200"
-            aria-label="Download Image"
-            title="Download Image"
-        >
-            <DownloadIcon className="w-6 h-6" />
-        </button>
-      </div>
-      <div className="p-6 space-y-6">
-        {/* Caption */}
-        <div className="p-4 bg-brand-bg rounded-lg">
-          <p className="whitespace-pre-wrap font-light">{result.caption}</p>
-        </div>
-        
-        {/* Prompt */}
-        <div>
-            <h3 className="text-sm font-semibold tracking-wider uppercase text-brand-text-muted mb-2">NanoBanana Prompt</h3>
-            <div className="p-4 bg-brand-bg rounded-lg">
-                <p className="text-sm text-brand-text-muted font-mono leading-relaxed">{result.prompt}</p>
+        <div className="relative group">
+            <img src={generatedImage.imageUrl} alt="Generated Persona" className="w-full h-auto" />
+            <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+                <button
+                    onClick={handleDownload}
+                    className="flex items-center gap-2 px-4 py-2 rounded-md bg-white/20 hover:bg-white/30 text-white text-sm font-medium"
+                >
+                    <DownloadIcon className="w-5 h-5" />
+                    Download
+                </button>
             </div>
         </div>
-      </div>
+        <div className="p-4 bg-brand-surface/50">
+            <label className="text-xs font-semibold text-brand-text-muted uppercase tracking-wider">Generation Prompt</label>
+            <div className="relative mt-2">
+                <p className="text-sm text-brand-text bg-brand-bg border border-brand-border rounded-md p-3 pr-10 whitespace-pre-wrap font-mono">
+                    {generatedImage.prompt}
+                </p>
+                <button onClick={handleCopyPrompt} className="absolute top-2 right-2 p-1.5 rounded-md text-brand-text-muted hover:bg-brand-bg hover:text-brand-text">
+                    {copied ? <CheckIcon className="w-5 h-5 text-green-400" /> : <CopyIcon className="w-5 h-5" />}
+                </button>
+            </div>
+        </div>
     </div>
   );
 };

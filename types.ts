@@ -1,20 +1,17 @@
-
+// FIX: Added type definitions for the application's data structures.
 export interface PersonaDNA {
   personality: string;
   aesthetic: string;
   environment: string;
 }
 
-export interface SceneDetails {
-  location: string;
-  time: string;
-  activity: string;
-  mood: string;
-  aspectRatio: string;
+export interface Scene {
+  action: string;
+  composition: string;
+  context: string;
 }
 
-export interface GenerationResult {
-  image: string; // base64 string
+export interface GeneratedImage {
+  imageUrl: string;
   prompt: string;
-  caption: string;
 }
