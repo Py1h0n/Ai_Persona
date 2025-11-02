@@ -1,5 +1,5 @@
 // FIX: Implemented the SceneForm component for scene configuration and image generation submission.
-import React, from 'react';
+import React, { useState } from 'react';
 import { SceneConfig } from '../types';
 import PresetInput from './PresetInput';
 import SparklesIcon from './icons/SparklesIcon';
@@ -210,9 +210,10 @@ const SceneForm: React.FC<SceneFormProps> = ({ onSubmit, isLoading }) => {
     location: 'The aesthetic corner of a minimalist cafe',
     timeOfDay: 'Golden hour, just before sunset (warm, soft, directional light)',
     cameraAngle: 'Eye-level, as if shot by a friend standing nearby',
+    additionalInstructions: '',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setSceneConfig((prev) => ({ ...prev, [name]: value }));
   };
@@ -228,3 +229,85 @@ const SceneForm: React.FC<SceneFormProps> = ({ onSubmit, isLoading }) => {
     e.preventDefault();
     onSubmit(sceneConfig);
   };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-brand-surface rounded-lg border border-brand-border p-4 sm:p-6 space-y-6">
+      <h2 className="text-xl font-semibold text-brand-secondary">2. Scene Configuration</h2>
+
+      <PresetInput
+        label="Action"
+        name="action"
+        value={sceneConfig.action}
+        placeholder="e.g., sipping coffee, reading a book"
+        presets={actionPresets}
+        onInputChange={handleInputChange}
+        onSelectChange={handleSelectChange}
+      />
+
+      <PresetInput
+        label="Location"
+        name="location"
+        value={sceneConfig.location}
+        placeholder="e.g., bustling street market, quiet library"
+        presets={locationPresets}
+        onInputChange={handleInputChange}
+        onSelectChange={handleSelectChange}
+      />
+      
+      <PresetInput
+        label="Time Of Day"
+        name="timeOfDay"
+        value={sceneConfig.timeOfDay}
+        placeholder="e.g., golden hour, moody night"
+        presets={timeOfDayPresets}
+        onInputChange={handleInputChange}
+        onSelectChange={handleSelectChange}
+      />
+
+      <PresetInput
+        label="Camera Angle"
+        name="cameraAngle"
+        value={sceneConfig.cameraAngle}
+        placeholder="e.g., eye-level, low angle"
+        presets={cameraAnglePresets}
+        onInputChange={handleInputChange}
+        onSelectChange={handleSelectChange}
+      />
+      
+      <div>
+        <label htmlFor="additionalInstructions" className="block text-sm font-medium text-brand-text mb-1">
+          Additional Instructions (Optional)
+        </label>
+        <textarea
+          id="additionalInstructions"
+          name="additionalInstructions"
+          rows={3}
+          value={sceneConfig.additionalInstructions}
+          onChange={handleInputChange}
+          placeholder="e.g., wearing a red scarf, looking directly at the camera, a small cat is sleeping on the sofa in the background..."
+          className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-sm focus:ring-brand-primary focus:border-brand-primary"
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="w-full flex items-center justify-center bg-brand-primary hover:bg-brand-primary/90 text-brand-bg font-semibold rounded-md px-4 py-3 disabled:bg-brand-primary/50 disabled:cursor-not-allowed transition-colors"
+      >
+        {isLoading ? (
+          <>
+            <SpinnerIcon className="w-5 h-5 mr-2" />
+            Generating...
+          </>
+        ) : (
+          <>
+            <SparklesIcon className="w-5 h-5 mr-2" />
+            Generate Image
+          </>
+        )}
+      </button>
+    </form>
+  );
+};
+
+export default SceneForm;

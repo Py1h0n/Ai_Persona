@@ -10,6 +10,7 @@ export interface SceneConfig {
   location: string;
   timeOfDay: string;
   cameraAngle: string;
+  additionalInstructions: string;
 }
 
 export interface GeneratedImage {

@@ -36,10 +36,6 @@ const App: React.FC = () => {
         setError("A reference face/body image is required.");
         return;
     }
-    if (!personaDNA.personality || !personaDNA.aesthetic || !personaDNA.environment) {
-        setError("Please fill out all fields in the Persona Blueprint.");
-        return;
-    }
 
     setIsLoading(true);
     setError(null);
