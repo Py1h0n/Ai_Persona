@@ -1,17 +1,19 @@
-// FIX: Added type definitions for the application's data structures.
+// FIX: Defined TypeScript types to be used across the application.
 export interface PersonaDNA {
   personality: string;
   aesthetic: string;
   environment: string;
 }
 
-export interface Scene {
+export interface SceneConfig {
   action: string;
-  composition: string;
-  context: string;
+  location: string;
+  timeOfDay: string;
+  cameraAngle: string;
 }
 
 export interface GeneratedImage {
   imageUrl: string;
   prompt: string;
+  caption?: string;
 }

@@ -1,229 +1,230 @@
-// FIX: Implemented the SceneForm component to capture scene details from the user.
-import React from 'react';
-import { Scene } from '../types';
+// FIX: Implemented the SceneForm component for scene configuration and image generation submission.
+import React, from 'react';
+import { SceneConfig } from '../types';
+import PresetInput from './PresetInput';
 import SparklesIcon from './icons/SparklesIcon';
 import SpinnerIcon from './icons/SpinnerIcon';
+import DiceIcon from './icons/DiceIcon';
 
 interface SceneFormProps {
-  scene: Scene;
-  setScene: React.Dispatch<React.SetStateAction<Scene>>;
-  onSubmit: () => void;
+  onSubmit: (sceneConfig: SceneConfig) => void;
   isLoading: boolean;
-  isReadyToGenerate: boolean;
 }
 
 const actionPresets = [
-  "Looking thoughtfully out a window",
-  "Casually sipping coffee in a cafe",
-  "Walking through a bustling city street at night",
-  "Reading a book in a cozy armchair",
-  "Laughing with an unseen friend",
-  "Working on a laptop in a minimalist office",
-  "Exploring a misty forest trail",
-  "Staring intensely at the camera",
-  "Getting caught in a sudden downpour",
-  "Browsing through a vintage record store",
-  // --- NEW PRESETS START HERE ---
-  "Adjusting their glasses or sunglasses",
-  "Tucking a strand of hair behind their ear",
-  "Leaning against a rustic brick wall",
-  "Looking over their shoulder with a slight smile",
-  "Holding a camera, as if taking a photo",
-  "A candid moment of fixing their outfit",
-  "Interacting with a pet (e.g., petting a cat)",
-  "Unfocused, in the middle of a natural movement",
-  "Applying lipstick in a mirror's reflection",
-  "Stretching lazily after waking up",
-  "Arranging flowers in a vase",
-  "Typing on a vintage typewriter",
-  "Hailing a taxi on a rainy city street",
-  "Mid-laugh, head tilted back",
-  "Holding a sparkler at night",
-  "Peeking out from behind a large plant",
-  "Eating a pastry at an outdoor Parisian cafe",
-  "Riding a bicycle down a charming street",
-  "Looking at a piece of art in a gallery",
-  "Playing a vinyl record",
-  "A blurry selfie in a moving car (passenger seat)",
-  "Holding a coffee cup with both hands for warmth",
-  "Checking their phone, illuminated by the screen's glow",
-  "The moment of blowing out a candle on a cake",
-  "Resting their chin on their hand, looking contemplative",
+    // Candid & Subtle
+    "Subtly smiling at something off-camera",
+    "Caught in the middle of a genuine laugh",
+    "Adjusting their glasses or a piece of jewelry",
+    "Fixing a stray hair from their face",
+    "Tucking hair behind their ear",
+    "Lost in thought, looking out a window",
+    "Checking their phone with a neutral expression",
+    "Glancing over their shoulder with a slight smile",
+    "Leaning against a wall, looking relaxed and comfortable",
+    "A candid moment of stretching, like just waking up",
+    "Buttoning or unbuttoning a jacket",
+    "Looking down at their shoes or the ground thoughtfully",
+    "Playing with the sleeves of their sweater",
+    "A moment of quiet contemplation, eyes closed",
+    "Mid-speech, as if in the middle of a conversation",
+    
+    // Interaction with Objects
+    "Taking a sip of coffee from a ceramic mug",
+    "Reading a book in a cozy corner",
+    "Working on a laptop in a cafe",
+    "Typing on a vintage typewriter",
+    "Arranging a small bouquet of flowers in a vase",
+    "Holding a phone, screen illuminated on their face",
+    "Flipping through a vinyl record in a store",
+    "Sketching in a notebook with a concentrated look",
+    "Holding a glass of wine up to the light",
+    "Applying lipstick in a compact mirror",
+    "Putting on or taking off headphones",
+    "Eating a pastry at a bakery",
+    "Holding an old film camera, about to take a picture",
+
+    // Dynamic & Movement
+    "Walking briskly down a city street, slight motion blur",
+    "Stepping out of a vintage taxi cab",
+    "Dancing freely in an empty room",
+    "Running a hand through their hair while walking",
+    "Hailing a cab on a rainy street",
+    "Riding a bicycle down a tree-lined path",
+    "Leaping over a puddle on the sidewalk",
+    "Caught mid-stride while crossing the street",
+    "Twirling in a flowy dress or skirt",
+
+    // Posed & Intentional
+    "Staring directly into the camera with a soft, inviting expression",
+    "A confident power pose, hands on hips",
+    "Sitting on the floor, surrounded by books and papers",
+    "Curled up on a sofa with a blanket",
+    "A classic 'outfit of the day' (OOTD) pose",
+    "A quick mirror selfie with a phone",
+    "Lying in a field of wildflowers",
+    "Peeking out from behind a large plant or doorway",
+    "Sitting on the edge of a bed, putting on shoes",
+    "A 'plandid' (planned candid) pose, looking away thoughtfully",
 ];
 
-const compositionPresets = [
-  "Candid, caught-off-guard shot",
-  "Close-up portrait, shallow depth of field",
-  "Wide shot, subject small in the frame",
-  "Dutch angle for a sense of unease",
-  "Shot from a low angle, looking up",
-  "Over-the-shoulder perspective",
-  "Reflected in a puddle or window",
-  "Framed by a doorway or window",
-  "Symmetrical, centered composition",
-  "Messy, chaotic, 'photo dump' style",
-  "Extreme close-up on an expressive detail (e.g., eyes, hands)",
-  "Point-of-view (POV) shot, seeing what they see",
-  "A single subject against a vast, empty landscape (negative space)",
-  "Silhouette against a bright sunset or window",
-  "Leading lines (roads, hallways) drawing focus to the subject",
-  "A 'flat lay' of items from their perspective",
-  "The subject is partially obscured by something in the foreground",
-  "Shot through a prism or crystal for light effects",
-  "Mirror selfie with the phone partially visible",
-  "Top-down 'God's eye' view",
-  "The subject is out of focus, but the background is sharp",
-  "Using the 'rule of thirds' for a balanced feel",
-  "A long exposure shot with light trails",
-  "Panning shot with a moving subject and blurred background",
-  "The subject's face is half-lit, half in shadow (chiaroscuro)",
-  "Fragmented view, seen through a broken mirror or screen",
-  "Unconventionally cropped, cutting off part of the subject",
-  "A shot where the subject breaks the fourth wall, looking at the viewer",
-  "Golden spiral composition for a natural feel",
-  "A tight, intimate shot that fills the entire frame",
-  "Handheld, slightly imperfect framing",
-  "A shot with a very deep depth of field, everything in focus",
-  // --- NEW PRESETS START HERE ---
-  "Intimate close-up, cropped at the collarbones",
-  "POV shot of their hands holding a book or a drink",
-  "Candid shot from behind as they walk through a beautiful location",
-  "Messy, authentic 'Get Ready With Me' bathroom mirror selfie",
-  "Shot from the passenger seat of a car, looking at the subject",
-  "Looking down at the camera, a playful and intimate angle",
-  "A detail shot focusing on their shoes and interesting pavement",
-  "Framed through a café window from the outside looking in",
-  "Golden hour portrait with a strong, hazy lens flare",
-  "A candid moment laughing genuinely, looking just off-camera",
-  "Low-angle shot emphasizing a powerful, confident stance in a city",
-  "A stolen moment, captured from a distance with a zoom lens",
-  "The 'follow me to' pose, holding an unseen hand and leading the viewer",
-  "Softly lit portrait with interesting shadows on the face (e.g., from blinds or leaves)",
-  "Elevator mirror selfie with moody, dramatic lighting",
-  "A candid moment of interaction with the environment (e.g., touching a flower)",
-  "Blurry, energetic shot from the middle of a crowded concert or party",
-  "Holding a phone up, as if vlogging directly to the audience",
-  "A quiet moment, curled up with a blanket on a sofa",
-  "Shot through foliage or flowers, creating a natural, soft foreground frame",
-  "The subject's face is obscured or hidden by hair, a hat, or an object, creating mystery",
-  "A shot capturing the subject's reflection in a shop window or sunglasses",
-  "A playful 'foodstagram' shot, holding food up to the camera",
-  "An intimate 'in-bed' selfie, looking relaxed and natural",
-  "The 'car selfie', using the car's interior and lighting creatively",
+const locationPresets = [
+    // Urban & City
+    "A bustling street market at noon",
+    "On a crowded, graffiti-covered subway car",
+    "A rooftop bar with a city view at night",
+    "A vibrant, neon-lit alleyway in a city like Tokyo or Seoul",
+    "An industrial loft apartment with large windows",
+    "An old, ornate library with green lamps",
+    "An empty movie theater after the show",
+    "The steps of a grand, historic museum",
+    "A gritty, underground parking garage with fluorescent lights",
+    "A busy crosswalk with motion-blurred traffic",
+    "A quiet, cobblestone street in a historic district",
+    "Inside a classic, vintage taxi cab",
+    "A sleek, modern airport lounge",
+    "An empty basketball court in the city",
+
+    // Cafes & Indoors
+    "A quiet, minimalist art gallery",
+    "A vintage, dimly-lit bookstore with towering shelves",
+    "A plant-filled conservatory or greenhouse",
+    "The aesthetic corner of a minimalist cafe",
+    "A cozy, cluttered antique shop",
+    "Inside a record store, surrounded by vinyl",
+    "A hotel room with a stunning city view",
+    "A moody, dimly-lit jazz club",
+    "A busy, steamy kitchen during service",
+    "An old-school laundromat at night",
+    "A grand, sunlit staircase in a historic building",
+
+    // Nature & Outdoors
+    "A foggy, moody beach at sunrise",
+    "A serene park with autumn leaves on the ground",
+    "A sun-drenched Italian lemon grove",
+    "A remote, scenic overlook in the mountains",
+    "Deep inside a lush, green forest",
+    "A hidden waterfall in a jungle",
+    "A desert landscape at golden hour",
+    "A snowy field during a light snowfall",
+    "A wooden pier on a calm lake",
+    "A vibrant field of sunflowers or lavender",
+    "On a boat, with the coastline in the distance",
+    
+    // Unique & Specific
+    "A colorful, aesthetic grocery store aisle",
+    "An empty swimming pool with interesting tiles",
+    "A charming Parisian balcony with a breakfast setup",
+    "An old, beautiful European cathedral interior",
+    "The interior of a luxurious private jet",
+    "A vibrant, bustling night market in Asia",
+    "An abandoned greenhouse, overgrown with plants",
+    "A neon-lit arcade, surrounded by games",
+    "In the driver's seat of a vintage car",
+    "A grand, historic theater, sitting in an empty seat",
+    "A local bakery, surrounded by fresh bread",
+    "A moody, rain-streaked car interior at night",
 ];
 
-const PresetInput = ({ label, name, value, placeholder, presets, onInputChange, onSelectChange }: {
-  label: string;
-  name: "action" | "composition" | "context";
-  value: string;
-  placeholder: string;
-  presets: string[];
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-}) => (
-  <div>
-      <label htmlFor={name} className="block text-sm font-medium text-brand-text mb-1">
-        {label}
-      </label>
-      <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="text"
-            id={name}
-            name={name}
-            value={value}
-            onChange={onInputChange}
-            placeholder={placeholder}
-            className="flex-1 w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-sm focus:ring-brand-primary focus:border-brand-primary"
-          />
-          <select
-              name={name}
-              value=""
-              onChange={onSelectChange}
-              className="w-full sm:w-auto bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-sm focus:ring-brand-primary focus:border-brand-primary"
-              aria-label={`${label} preset`}
-          >
-              <option value="">-- Select Preset --</option>
-              {presets.map(preset => <option key={preset} value={preset}>{preset}</option>)}
-          </select>
-      </div>
-    </div>
-);
+const timeOfDayPresets = [
+    // Golden Hours
+    "Golden hour, just before sunset (warm, soft, directional light)",
+    "Sunrise golden hour, just as the sun appears (crisp, warm light)",
+
+    // Daylight
+    "High noon, with harsh, direct sunlight and sharp, graphic shadows",
+    "Overcast day, with soft, diffused, and even light (perfect for portraits)",
+    "Mid-afternoon, bright and clear with a cool blue sky",
+    "Dappled sunlight filtering through tree leaves",
+    "Bright, indirect light coming from a large window",
+    "Foggy morning, with muted colors and a soft, ethereal glow",
+
+    // Evening & Night
+    "Blue hour, the period just after sunset (cool, deep blue tones)",
+    "Dusk, with city lights beginning to turn on against a fading sky",
+    "Late at night, illuminated only by artificial street lighting (neon, warm lamps)",
+    "Midnight, deep and dark with high contrast lighting",
+    "Neon lights reflecting on wet pavement after rain",
+    "The warm, intimate glow from a single candle or lamp",
+    "The cool, blueish light from a phone or laptop screen at night",
+    "Cozy, warm light from a fireplace",
+    "The flickering, dynamic light of a bonfire",
+    "Moonlight on a clear night, creating soft, cool shadows",
+
+    // Specific & Stylistic
+    "Direct, high-contrast flash photography at night",
+    "Long exposure at night, creating light trails from traffic",
+    "The hazy, dreamy light of a summer afternoon",
+    "The dramatic, stormy light before a thunderstorm",
+    "Silhouette against a bright sunset or sunrise",
+    "Backlit by the sun, creating a glowing halo effect",
+    "The soft, ambient light inside a tent at night",
+    "Light filtered through colored glass or blinds, creating patterns",
+];
+
+const cameraAnglePresets = [
+    // Standard & Common
+    "Eye-level, as if shot by a friend standing nearby",
+    "Medium shot, from the waist up (classic portrait style)",
+    "Full-body shot, showing their entire outfit and posture",
+    "Tight close-up, focusing on their expression and details (eyes, lips)",
+    "Wide shot, capturing the subject within their grand environment",
+
+    // Creative Angles
+    "Low angle, looking slightly up at the subject (empowering)",
+    "High angle, looking slightly down at the subject (intimate, thoughtful)",
+    "Dutch angle, tilted for a dynamic or uneasy feeling",
+    "Over-the-shoulder perspective, hinting at an interaction",
+    "Point-of-view (POV), as if seeing through the influencer's eyes",
+
+    // Candid & "Shot on Phone"
+    "Quick mirror selfie with a phone visible in the shot",
+    "0.5x ultra-wide angle from a low angle, creating slight distortion",
+    "A messy, slightly blurry 'photo dump' style selfie",
+    "Shot from the hip, without looking (a true candid)",
+    "Taken through a reflective surface (puddle, shop window)",
+    "FaceTime or video call perspective",
+    "Shot from across the street with a zoom lens (paparazzi feel)",
+    "Slightly out of focus, emphasizing mood over sharpness",
+    "A quick, spontaneous shot with accidental motion blur",
+    "Framed by a natural element (leaves, doorway)",
+    
+    // Compositional Techniques
+    "Shot through a window or doorway, for a voyeuristic feel",
+    "Rule of thirds, subject placed off-center",
+    "Symmetrical, with the subject perfectly centered",
+    "Leading lines, using roads or architecture to guide the eye",
+    "Frame within a frame (using a window, archway, etc.)",
+    "Shallow depth of field, with a very blurry background (bokeh)",
+    "Deep depth of field, where everything is in sharp focus",
+    "A 'detail shot,' focusing on hands, shoes, or an object they're holding",
+    "Silhouette shot, with the subject dark against a bright background",
+    "Panning shot, following a moving subject to blur the background",
+    "A macro shot, extremely close to a small detail",
+];
 
 
-const SceneForm: React.FC<SceneFormProps> = ({ scene, setScene, onSubmit, isLoading, isReadyToGenerate }) => {
-  const handleSceneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const SceneForm: React.FC<SceneFormProps> = ({ onSubmit, isLoading }) => {
+  const [sceneConfig, setSceneConfig] = useState<SceneConfig>({
+    action: 'Subtly smiling at something off-camera',
+    location: 'The aesthetic corner of a minimalist cafe',
+    timeOfDay: 'Golden hour, just before sunset (warm, soft, directional light)',
+    cameraAngle: 'Eye-level, as if shot by a friend standing nearby',
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setScene(prev => ({ ...prev, [name]: value }));
+    setSceneConfig((prev) => ({ ...prev, [name]: value }));
   };
-
-  const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (value) {
-        setScene(prev => ({ ...prev, [name]: value }));
+        setSceneConfig(prev => ({ ...prev, [name]: value }));
     }
   }
 
-  return (
-    <div className="bg-brand-surface rounded-lg border border-brand-border p-4 sm:p-6 space-y-6 mt-6">
-      <h2 className="text-xl font-semibold text-brand-primary">2. Scene Details</h2>
-
-      <PresetInput
-        label="Action / Pose"
-        name="action"
-        value={scene.action}
-        placeholder="e.g., sipping coffee, looking out a window"
-        presets={actionPresets}
-        onInputChange={handleSceneChange}
-        onSelectChange={handlePresetChange}
-      />
-
-      <PresetInput
-        label="Photo Composition"
-        name="composition"
-        value={scene.composition}
-        placeholder="e.g., close-up portrait, wide shot, candid"
-        presets={compositionPresets}
-        onInputChange={handleSceneChange}
-        onSelectChange={handlePresetChange}
-      />
-
-      <div>
-        <label htmlFor="context" className="block text-sm font-medium text-brand-text mb-1">
-          Context / Fake "Social Media Caption"
-        </label>
-        <input
-          type="text"
-          id="context"
-          name="context"
-          value={scene.context}
-          onChange={handleSceneChange}
-          placeholder="e.g., 'Another rainy Tuesday.' or 'Lost in thought.'"
-          className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-sm focus:ring-brand-primary focus:border-brand-primary"
-        />
-      </div>
-
-      <div className="pt-2">
-        <button
-          type="button"
-          onClick={onSubmit}
-          disabled={!isReadyToGenerate || isLoading}
-          className="w-full flex items-center justify-center bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold rounded-md px-4 py-3 disabled:bg-brand-primary/50 disabled:cursor-not-allowed transition-colors"
-        >
-          {isLoading ? (
-            <>
-              <SpinnerIcon className="w-5 h-5 mr-2" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <SparklesIcon className="w-5 h-5 mr-2" />
-              Generate Persona Image
-            </>
-          )}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-export default SceneForm;
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(sceneConfig);
+  };

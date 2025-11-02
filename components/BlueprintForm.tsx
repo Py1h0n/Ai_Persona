@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { PersonaDNA } from '../types';
 import PhotoIcon from './icons/PhotoIcon';
 import XCircleIcon from './icons/XCircleIcon';
+import PresetInput from './PresetInput'; // Import the new reusable component
 
 interface BlueprintFormProps {
   personaDNA: PersonaDNA;
@@ -204,7 +205,6 @@ const environmentPresets = [
     "A high-end, minimalist kitchen during cooking",
 ];
 
-// FIX: Moved component definition outside of BlueprintForm to prevent re-creation on re-renders.
 const ImageInput = ({ label, required, preview, onInputChange, onRemove, inputRef }: {
     label: string;
     required?: boolean;
@@ -250,43 +250,6 @@ const ImageInput = ({ label, required, preview, onInputChange, onRemove, inputRe
     </div>
 );
 
-// FIX: Moved component definition outside of BlueprintForm to prevent re-creation on re-renders.
-const PresetInput = ({ label, name, value, placeholder, presets, onInputChange, onSelectChange }: {
-  label: string;
-  name: "personality" | "aesthetic" | "environment";
-  value: string;
-  placeholder: string;
-  presets: string[];
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-}) => (
-  <div>
-      <label htmlFor={name} className="block text-sm font-medium text-brand-text mb-1">
-        {label}
-      </label>
-      <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="text"
-            id={name}
-            name={name}
-            value={value}
-            onChange={onInputChange}
-            placeholder={placeholder}
-            className="flex-1 w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-sm focus:ring-brand-primary focus:border-brand-primary"
-          />
-          <select
-              name={name}
-              value="" // Reset select to placeholder
-              onChange={onSelectChange}
-              className="w-full sm:w-auto bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-sm focus:ring-brand-primary focus:border-brand-primary"
-              aria-label={`${label} preset`}
-          >
-              <option value="">-- Select Preset --</option>
-              {presets.map(preset => <option key={preset} value={preset}>{preset}</option>)}
-          </select>
-      </div>
-    </div>
-);
 
 const BlueprintForm: React.FC<BlueprintFormProps> = ({
   personaDNA,
@@ -329,7 +292,6 @@ const BlueprintForm: React.FC<BlueprintFormProps> = ({
       setImage(null);
       setPreview(null);
     }
-    // Reset file input value to allow re-uploading the same file
     if (e.target) {
         e.target.value = '';
     }

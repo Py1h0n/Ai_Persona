@@ -5,21 +5,25 @@ import Loader from './Loader';
 import DownloadIcon from './icons/DownloadIcon';
 import CopyIcon from './icons/CopyIcon';
 import CheckIcon from './icons/CheckIcon';
+import SpinnerIcon from './icons/SpinnerIcon';
+import ChatBubbleIcon from './icons/ChatBubbleIcon';
 
 interface ResultDisplayProps {
   isLoading: boolean;
   generatedImage: GeneratedImage | null;
   error: string | null;
+  isGeneratingCaption: boolean;
+  onGenerateCaption: () => void;
 }
 
-const ResultDisplay: React.FC<ResultDisplayProps> = ({ isLoading, generatedImage, error }) => {
-  const [copied, setCopied] = useState(false);
+const ResultDisplay: React.FC<ResultDisplayProps> = ({ isLoading, generatedImage, error, isGeneratingCaption, onGenerateCaption }) => {
+  const [promptCopied, setPromptCopied] = useState(false);
 
   const handleCopyPrompt = () => {
     if (generatedImage?.prompt) {
       navigator.clipboard.writeText(generatedImage.prompt);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setPromptCopied(true);
+      setTimeout(() => setPromptCopied(false), 2000);
     }
   };
 
@@ -71,15 +75,44 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ isLoading, generatedImage
                 </button>
             </div>
         </div>
-        <div className="p-4 bg-brand-surface/50">
-            <label className="text-xs font-semibold text-brand-text-muted uppercase tracking-wider">Generation Prompt</label>
-            <div className="relative mt-2">
-                <p className="text-sm text-brand-text bg-brand-bg border border-brand-border rounded-md p-3 pr-10 whitespace-pre-wrap font-mono">
-                    {generatedImage.prompt}
-                </p>
-                <button onClick={handleCopyPrompt} className="absolute top-2 right-2 p-1.5 rounded-md text-brand-text-muted hover:bg-brand-bg hover:text-brand-text">
-                    {copied ? <CheckIcon className="w-5 h-5 text-green-400" /> : <CopyIcon className="w-5 h-5" />}
+        <div className="p-4 space-y-4">
+            {generatedImage.caption ? (
+                 <div>
+                    <label className="text-xs font-semibold text-brand-text-muted uppercase tracking-wider">AI Generated Caption</label>
+                    <p className="mt-2 text-sm text-brand-text bg-brand-bg border border-brand-border rounded-md p-3 whitespace-pre-wrap">
+                        {generatedImage.caption}
+                    </p>
+                </div>
+            ) : (
+                <button
+                    onClick={onGenerateCaption}
+                    disabled={isGeneratingCaption}
+                    className="w-full flex items-center justify-center bg-brand-secondary hover:bg-brand-secondary/90 text-brand-bg font-semibold rounded-md px-4 py-2 disabled:bg-brand-secondary/50 disabled:cursor-not-allowed transition-colors text-sm"
+                >
+                    {isGeneratingCaption ? (
+                        <>
+                            <SpinnerIcon className="w-4 h-4 mr-2" />
+                            Writing...
+                        </>
+                    ) : (
+                        <>
+                            <ChatBubbleIcon className="w-4 h-4 mr-2" />
+                            Generate Caption
+                        </>
+                    )}
                 </button>
+            )}
+
+            <div>
+                <label className="text-xs font-semibold text-brand-text-muted uppercase tracking-wider">Generation Prompt</label>
+                <div className="relative mt-2">
+                    <p className="text-sm text-brand-text bg-brand-bg border border-brand-border rounded-md p-3 pr-10 whitespace-pre-wrap font-mono max-h-48 overflow-y-auto">
+                        {generatedImage.prompt}
+                    </p>
+                    <button onClick={handleCopyPrompt} className="absolute top-2 right-2 p-1.5 rounded-md text-brand-text-muted hover:bg-brand-bg hover:text-brand-text">
+                        {promptCopied ? <CheckIcon className="w-5 h-5 text-green-400" /> : <CopyIcon className="w-5 h-5" />}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
