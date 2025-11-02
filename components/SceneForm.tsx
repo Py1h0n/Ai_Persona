@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SceneDetails } from '../types';
 import SparklesIcon from './icons/SparklesIcon';
@@ -9,7 +8,17 @@ interface SceneFormProps {
   handleGenerate: () => void;
   isLoading: boolean;
   hasReferenceImage: boolean;
+  disabled?: boolean;
 }
+
+const MOOD_OPTIONS = ['nostalgic', 'content', 'playful', 'melancholy', 'serene', 'energetic'];
+const ASPECT_RATIO_OPTIONS = [
+  { label: "Square (1:1)", value: "1:1" },
+  { label: "Portrait (4:5)", value: "4:5" },
+  { label: "Story / Reel (9:16)", value: "9:16" },
+  { label: "Landscape (16:9)", value: "16:9" },
+  { label: "Wide (4:3)", value: "4:3" },
+];
 
 const SceneForm: React.FC<SceneFormProps> = ({
   sceneDetails,
@@ -17,9 +26,10 @@ const SceneForm: React.FC<SceneFormProps> = ({
   handleGenerate,
   isLoading,
   hasReferenceImage,
+  disabled,
 }) => {
     
-  const handleSceneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSceneChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setSceneDetails(prev => ({ ...prev, [name]: value }));
   };
@@ -65,22 +75,45 @@ const SceneForm: React.FC<SceneFormProps> = ({
           />
         </div>
         <div>
-          <label htmlFor="mood" className="block text-sm font-medium text-brand-text-muted">Mood</label>
-          <input
-            type="text"
-            name="mood"
-            id="mood"
-            value={sceneDetails.mood}
+          <label htmlFor="aspectRatio" className="block text-sm font-medium text-brand-text-muted">Aspect Ratio</label>
+          <select
+            name="aspectRatio"
+            id="aspectRatio"
+            value={sceneDetails.aspectRatio}
             onChange={handleSceneChange}
             className="mt-1 block w-full bg-brand-bg border-brand-border rounded-md shadow-sm focus:ring-brand-secondary focus:border-brand-secondary sm:text-sm p-2"
-            placeholder="e.g., subtle melancholy smile"
-          />
+          >
+            {ASPECT_RATIO_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-brand-text-muted">Mood</label>
+           <div className="mt-2 flex flex-wrap gap-2">
+            {MOOD_OPTIONS.map(opt => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setSceneDetails(prev => ({ ...prev, mood: opt }))}
+                className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                  sceneDetails.mood === opt
+                    ? 'bg-brand-secondary text-brand-bg font-semibold'
+                    : 'bg-brand-bg hover:bg-brand-border text-brand-text-muted'
+                }`}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
         </div>
         
         <button
           type="button"
           onClick={handleGenerate}
-          disabled={isLoading || !hasReferenceImage}
+          disabled={isLoading || disabled || !hasReferenceImage}
           className="w-full flex justify-center items-center gap-2 px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-brand-bg bg-gradient-to-r from-brand-primary to-brand-secondary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
         >
           {isLoading ? (

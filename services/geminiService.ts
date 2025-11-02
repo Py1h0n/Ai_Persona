@@ -1,28 +1,23 @@
-
 import { GoogleGenAI, Modality } from "@google/genai";
 import { PersonaDNA, SceneDetails } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-}
-
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-export async function generateInfluencerImage(base64ImageData: string, mimeType: string, prompt: string): Promise<string> {
+export async function generateInfluencerImage(images: { data: string; mimeType: string }[], prompt: string): Promise<string> {
+    
+    const imageParts = images.map(image => ({
+        inlineData: {
+            data: image.data,
+            mimeType: image.mimeType,
+        },
+    }));
+
+    const allParts = [...imageParts, { text: prompt }];
+
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
-            parts: [
-                {
-                    inlineData: {
-                        data: base64ImageData,
-                        mimeType: mimeType,
-                    },
-                },
-                {
-                    text: prompt,
-                },
-            ],
+            parts: allParts,
         },
         config: {
             responseModalities: [Modality.IMAGE],

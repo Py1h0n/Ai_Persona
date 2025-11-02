@@ -10,6 +10,7 @@ export interface SceneDetails {
   time: string;
   activity: string;
   mood: string;
+  aspectRatio: string;
 }
 
 export interface GenerationResult {
